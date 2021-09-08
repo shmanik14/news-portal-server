@@ -5,7 +5,7 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const objectId = require('mongodb').ObjectId;
 
-const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.cxkd4.mongodb.net/ddblog?retryWrites=true&w=majority`;
+const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.cxkd4.mongodb.net/news-portal?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
 
 const app = express()
@@ -15,7 +15,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 const port = process.env.PORT || 4000
 
 client.connect(err => {
-    const serviceCollection = client.db("ddblog").collection("blogs");
+    const serviceCollection = client.db("news-portal").collection("news");
 
 
     app.post('/addBlog', (req,res) => {
@@ -52,7 +52,7 @@ client.connect(err => {
 })
 
 app.get('/', (req, res) => {
-    res.send('Hello, Daily Dose Blog')
+    res.send('Hello, News Portal')
   })
   
 app.listen(port)

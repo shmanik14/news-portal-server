@@ -15,12 +15,22 @@ app.use(bodyParser.urlencoded({ extended: false }));
 const port = process.env.PORT || 4000
 
 client.connect(err => {
-    const serviceCollection = client.db("news-portal").collection("news");
+    const newsCollection = client.db("news-portal").collection("news");
+    const adminCollection = client.db("news-portal").collection("admin");
 
 
-    app.post('/addBlog', (req,res) => {
+  app.post('/addBlog', (req,res) => {
       const blog = req.body;
-      serviceCollection.insertOne(blog)
+      newsCollection.insertOne(blog)
+      .then(result => {
+          console.log(result);
+          res.send(result.insertedCount > 0)
+      })
+  })
+
+  app.post('/addAdmin', (req,res) => {
+      const admin = req.body;
+      adminCollection.insertOne(admin)
       .then(result => {
           console.log(result);
           res.send(result.insertedCount > 0)
@@ -28,24 +38,34 @@ client.connect(err => {
   })
 
   app.get('/blogs', (req, res) => {
-    serviceCollection.find({})
+    newsCollection.find({})
     .toArray((err, documents) => {
         res.send(documents);
     })
   })
 
   app.get('/blog/:id', (req, res) => {
-    serviceCollection.find({_id: objectId(req.params.id)})
+    newsCollection.find({_id: objectId(req.params.id)})
     .toArray((err, documents) => {
       res.send(documents[0]);
     })
   })
 
   app.delete("/delete/:id", (req, res) => {
-    serviceCollection.findOneAndDelete({_id: objectId(req.params.id)})
+    newsCollection.findOneAndDelete({_id: objectId(req.params.id)})
     .then(result => {
       console.log(result)
       res.send(result.deletedCount > 0);
+    })
+  })
+
+  app.get("/isAdmin", (req, res) => {
+    adminCollection.find({ email: req.query.email }).toArray((err, doc) => {
+      if(doc.length !== 0){
+        res.json({isAdmin:true}).status(200);
+      }else{
+        res.json({isAdmin:false, message:'Permission denied'}).status(403);
+      }
     })
   })
   
